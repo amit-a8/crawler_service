@@ -1,0 +1,33 @@
+import re 
+from scrapper_utils import process_request_GET
+import requests 
+
+def get_webpage_data(url, level=0):
+    url_resp = dict()
+    try:
+        resp = process_request_GET(url)
+        text = resp.text
+        if resp.status_code != 200:
+            print("unable to get response")
+            return {}
+
+        title_regex = re.compile("<title>(.*?)</title>")
+        h1_regex = re.compile("<h1><p><strong>(.*?)</strong></p></h1>")
+        url_resp['h1'] = re.findall(h1_regex,text)
+        url_resp['title'] = re.findall(title_regex,text)
+        url_resp['links'] = re.findall('"((http|ftp)s?://.*?)"', text) 
+        return url_resp
+
+    except requests.exceptions.ConnectionError as e:
+        print(e)
+        return {}
+    
+    except requests.exceptions.Timeout as e:
+        print(e)
+        return {}
+
+    except Exception as e: 
+        print(e)
+        return {}
+
+print(get_webpage_data('https://gale.agency/'))
